@@ -21,9 +21,12 @@ def calculate_hash(filepath, hash_name):
 
 
 def _recursive_folderstats(folderpath,
-    items=[], hash_name=None, verbose=False):
+    items=[], hash_name=None, ignore_hidden=False, verbose=False):
     foldersize, num_files = 0, 0
     for f in os.listdir(folderpath):
+        if ignore_hidden and f.startswith('.'):
+            continue
+
         filepath = os.path.join(folderpath, f)
         stats = os.stat(filepath)
         foldersize += stats.st_size
@@ -56,7 +59,8 @@ def _recursive_folderstats(folderpath,
     return items, foldersize, num_files
 
 
-def folderstats(folderpath, hash_name=None, verbose=False, microseconds=False, absolute_paths=False):
+def folderstats(folderpath, hash_name=None, microseconds=False,
+    absolute_paths=False, ignore_hidden=False, verbose=False):
     columns = ['path', 'name', 'extension', 'size',
                'atime', 'mtime', 'ctime', 'folder', 'num_files']
     if hash_name:
@@ -64,7 +68,10 @@ def folderstats(folderpath, hash_name=None, verbose=False, microseconds=False, a
         columns.append(hash_name)
 
     items, foldersize, num_files = _recursive_folderstats(
-        folderpath, hash_name=hash_name, verbose=verbose)
+        folderpath,
+        hash_name=hash_name,
+        ignore_hidden=ignore_hidden,
+        verbose=verbose)
     df = pd.DataFrame(items, columns=columns)
 
     for col in ['atime', 'mtime', 'ctime']:

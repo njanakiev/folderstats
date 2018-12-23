@@ -6,22 +6,32 @@ import folderstats
 def main():
     parser = argparse.ArgumentParser(
         description="Creates statistics from a folder structure")
-    parser.add_argument(action='store', dest='folderpath',
+    parser.add_argument(action='store',
+        dest='folderpath',
         help='input folder path')
-    parser.add_argument('-o', action='store', dest='output_filepath',
-        default=None, help='output filepath, CSV and JSON supported',
+    parser.add_argument('-o', action='store',
+        dest='output_filepath', default=None,
+        help='output filepath, CSV and JSON supported',
         required=False)
-    parser.add_argument('-c', action='store', dest='hash_name',
-        default=None, help='hash function for checksum',
+    parser.add_argument('-c', action='store',
+        dest='hash_name', default=None,
+        help='hash function for checksum',
         required=False)
-    parser.add_argument('-a', action='store_true', dest='absolute_paths',
-        default=False, help='add absolute path column',
+    parser.add_argument('-a', action='store_true',
+        dest='absolute_paths', default=False,
+        help='add absolute path column',
         required=False)
-    parser.add_argument('-m', action='store_true', dest='microseconds',
-        default=False, help='store timestamps with microseconds',
+    parser.add_argument('-m', action='store_true',
+        dest='microseconds', default=False,
+        help='store timestamps with microseconds',
         required=False)
-    parser.add_argument('-v', action='store_true', dest='verbose',
-        default=False, help='verbose console output',
+    parser.add_argument('-i', action='store_true',
+        dest='ignore_hidden', default=False,
+        help='ignore hidden files and folders, Linux and Unix only',
+        required=False)
+    parser.add_argument('-v', action='store_true',
+        dest='verbose', default=False,
+        help='verbose console output',
         required=False)
 
     args = parser.parse_args()
@@ -39,9 +49,10 @@ def main():
         df = folderstats.folderstats(
             args.folderpath,
             hash_name=args.hash_name,
-            verbose=args.verbose,
             microseconds=args.microseconds,
-            absolute_paths=args.absolute_paths)
+            absolute_paths=args.absolute_paths,
+            ignore_hidden=args.ignore_hidden,
+            verbose=args.verbose)
     except Exception as e:
         print('ERROR :', e)
         exit(-1)
