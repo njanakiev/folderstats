@@ -7,15 +7,22 @@ def main():
     parser = argparse.ArgumentParser(
         description="Creates statistics from a folder structure")
     parser.add_argument(action='store', dest='folderpath',
-        help='Folder path')
+        help='input folder path')
     parser.add_argument('-o', action='store', dest='output_filepath',
-        default=None, help='Output filepath', required=False)
-    parser.add_argument('-v', action='store_true', dest='verbose',
-        default=False, help='Verbose console output', required=False)
-    parser.add_argument('-m', action='store_true', dest='microseconds',
-        default=False, help='Store timestamps with microseconds', required=False)
+        default=None, help='output filepath, CSV and JSON supported',
+        required=False)
     parser.add_argument('-c', action='store', dest='hash_name',
-        default=None, help='hash function for checksum', required=False)
+        default=None, help='hash function for checksum',
+        required=False)
+    parser.add_argument('-a', action='store_true', dest='absolute_paths',
+        default=False, help='add absolute path column',
+        required=False)
+    parser.add_argument('-m', action='store_true', dest='microseconds',
+        default=False, help='store timestamps with microseconds',
+        required=False)
+    parser.add_argument('-v', action='store_true', dest='verbose',
+        default=False, help='verbose console output',
+        required=False)
 
     args = parser.parse_args()
 
@@ -33,7 +40,8 @@ def main():
             args.folderpath,
             hash_name=args.hash_name,
             verbose=args.verbose,
-            microseconds=args.microseconds)
+            microseconds=args.microseconds,
+            absolute_paths=args.absolute_paths)
     except Exception as e:
         print('ERROR :', e)
         exit(-1)

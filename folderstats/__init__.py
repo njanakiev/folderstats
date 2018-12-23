@@ -16,12 +16,13 @@ def calculate_hash(filepath, hash_name):
         checksum = getattr(hashlib, hash_name)()
         for chunk in iter(lambda: f.read(4096), b''):
             checksum.update(chunk)
+
         return checksum.hexdigest()
 
 
 def _recursive_folderstats(folderpath,
     items=[], hash_name=None, verbose=False):
-    foldersize = 0
+    foldersize, num_files = 0, 0
     for f in os.listdir(folderpath):
         filepath = os.path.join(folderpath, f)
         stats = os.stat(filepath)
@@ -31,34 +32,38 @@ def _recursive_folderstats(folderpath,
             if verbose:
                 print('FOLDER :', filepath)
 
-            items, _foldersize = _recursive_folderstats(
+            items, _foldersize, _num_files = _recursive_folderstats(
                 filepath, items, hash_name, verbose)
             foldersize += _foldersize
+            num_files += _num_files
         else:
-            item = [filepath, f, stats.st_size,
-                    stats.st_atime, stats.st_mtime, stats.st_ctime, False]
+            filename, extension = os.path.splitext(f)
+            extension = extension[1:] if extension else None
+            item = [filepath, filename, extension, stats.st_size,
+                    stats.st_atime, stats.st_mtime, stats.st_ctime, False, None]
             if hash_name:
                 item.append(calculate_hash(filepath, hash_name))
             items.append(item)
+            num_files += 1
 
     stats = os.stat(folderpath)
-    item = [folderpath, folderpath, foldersize,
-            stats.st_atime, stats.st_mtime, stats.st_ctime, True]
+    item = [folderpath, folderpath, None, foldersize,
+            stats.st_atime, stats.st_mtime, stats.st_ctime, True, num_files]
     if hash_name:
         item.append(None)
     items.append(item)
 
-    return items, foldersize
+    return items, foldersize, num_files
 
 
-def folderstats(folderpath, hash_name=None, verbose=False, microseconds=False):
-    columns = ['path', 'name', 'size',
-               'atime', 'mtime', 'ctime', 'folder']
+def folderstats(folderpath, hash_name=None, verbose=False, microseconds=False, absolute_paths=False):
+    columns = ['path', 'name', 'extension', 'size',
+               'atime', 'mtime', 'ctime', 'folder', 'num_files']
     if hash_name:
         hash_name = hash_name.lower()
         columns.append(hash_name)
 
-    items, foldersize = _recursive_folderstats(
+    items, foldersize, num_files = _recursive_folderstats(
         folderpath, hash_name=hash_name, verbose=verbose)
     df = pd.DataFrame(items, columns=columns)
 
@@ -66,5 +71,9 @@ def folderstats(folderpath, hash_name=None, verbose=False, microseconds=False):
         df[col] = df[col].apply(
             lambda d: datetime.fromtimestamp(d) if microseconds else \
                 datetime.fromtimestamp(d).replace(microsecond=0))
+
+    if absolute_paths:
+        df.insert(0, 'absolute_path', df['path'].apply(
+            lambda p: os.path.abspath(p)))
 
     return df
