@@ -21,7 +21,7 @@ def calculate_hash(filepath, hash_name):
 
 
 def _recursive_folderstats(folderpath,
-    items=[], hash_name=None, ignore_hidden=False, verbose=False):
+    items=[], hash_name=None, ignore_hidden=False, depth=0, verbose=False):
     foldersize, num_files = 0, 0
     for f in os.listdir(folderpath):
         if ignore_hidden and f.startswith('.'):
@@ -33,17 +33,18 @@ def _recursive_folderstats(folderpath,
 
         if os.path.isdir(filepath):
             if verbose:
-                print('FOLDER :', filepath)
+                print('FOLDER : {}'.format(filepath))
 
             items, _foldersize, _num_files = _recursive_folderstats(
-                filepath, items, hash_name, verbose)
+                filepath, items, hash_name, ignore_hidden, depth + 1, verbose)
             foldersize += _foldersize
             num_files += _num_files
         else:
             filename, extension = os.path.splitext(f)
             extension = extension[1:] if extension else None
             item = [filepath, filename, extension, stats.st_size,
-                    stats.st_atime, stats.st_mtime, stats.st_ctime, False, None]
+                    stats.st_atime, stats.st_mtime, stats.st_ctime,
+                    False, None, depth]
             if hash_name:
                 item.append(calculate_hash(filepath, hash_name))
             items.append(item)
@@ -51,7 +52,8 @@ def _recursive_folderstats(folderpath,
 
     stats = os.stat(folderpath)
     item = [folderpath, folderpath, None, foldersize,
-            stats.st_atime, stats.st_mtime, stats.st_ctime, True, num_files]
+            stats.st_atime, stats.st_mtime, stats.st_ctime,
+            True, num_files, depth]
     if hash_name:
         item.append(None)
     items.append(item)
@@ -62,7 +64,7 @@ def _recursive_folderstats(folderpath,
 def folderstats(folderpath, hash_name=None, microseconds=False,
     absolute_paths=False, ignore_hidden=False, verbose=False):
     columns = ['path', 'name', 'extension', 'size',
-               'atime', 'mtime', 'ctime', 'folder', 'num_files']
+               'atime', 'mtime', 'ctime', 'folder', 'num_files', 'depth']
     if hash_name:
         hash_name = hash_name.lower()
         columns.append(hash_name)
