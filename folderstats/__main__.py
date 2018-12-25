@@ -29,6 +29,10 @@ def main():
         dest='ignore_hidden', default=False,
         help='ignore hidden files and folders, Linux and Unix only',
         required=False)
+    parser.add_argument('-p', action='store_true',
+        dest='parent', default=False,
+        help='Add index and parent index',
+        required=False)
     parser.add_argument('-v', action='store_true',
         dest='verbose', default=False,
         help='verbose console output',
@@ -45,17 +49,14 @@ def main():
         print('Output type not supported : ', args.folderpath)
         exit(-1)
 
-    try:
-        df = folderstats.folderstats(
-            args.folderpath,
-            hash_name=args.hash_name,
-            microseconds=args.microseconds,
-            absolute_paths=args.absolute_paths,
-            ignore_hidden=args.ignore_hidden,
-            verbose=args.verbose)
-    except Exception as e:
-        print('ERROR :', e)
-        exit(-1)
+    df = folderstats.folderstats(
+        args.folderpath,
+        hash_name=args.hash_name,
+        microseconds=args.microseconds,
+        absolute_paths=args.absolute_paths,
+        ignore_hidden=args.ignore_hidden,
+        parent=args.parent,
+        verbose=args.verbose)
 
     if args.output_filepath:
         if args.output_filepath.endswith('.csv'):
