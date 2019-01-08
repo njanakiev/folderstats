@@ -6,16 +6,15 @@ import os.path
 HERE = os.path.abspath(os.path.dirname(__file__))
 
 # The text of the README file
-with open(os.path.join(HERE, "README.md")) as fid:
+with open(os.path.join(HERE, "README.rst")) as fid:
     README = fid.read()
 
 # This call to setup() does all the work
 setup(
     name="folderstats",
-    version="0.1.0",
+    version="0.2.0",
     description="Creates statistics from a folder structure",
     long_description=README,
-    long_description_content_type="text/markdown",
     url="https://github.com/njanakiev/folderstats",
     author="Nikolai Janakiev",
     author_email="nikolai.janakiev@gmail.com",
