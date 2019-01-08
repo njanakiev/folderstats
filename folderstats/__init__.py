@@ -7,6 +7,8 @@ from datetime import datetime
 
 
 def calculate_hash(filepath, hash_name):
+    """Calculate the hash of a file. The available hashes are given by the hashlib module. The available hashes can be listed with hashlib.algorithms_available."""
+
     hash_name = hash_name.lower()
     if not hasattr(hashlib, hash_name):
         raise Exception('Hash algorithm not available : {}'\
@@ -21,7 +23,9 @@ def calculate_hash(filepath, hash_name):
 
 
 def _recursive_folderstats(folderpath, items=[], hash_name=None,
-    ignore_hidden=False, depth=0, idx=1, parent_idx=0, verbose=False):
+                           ignore_hidden=False, depth=0, idx=1, parent_idx=0,
+                           verbose=False):
+    """Helper function that recursively collects folder statistics and returns current id, foldersize and number of files traversed."""
     foldersize, num_files = 0, 0
     current_idx = idx
 
@@ -55,7 +59,8 @@ def _recursive_folderstats(folderpath, items=[], hash_name=None,
             num_files += 1
 
     stats = os.stat(folderpath)
-    item = [current_idx, folderpath, folderpath, None, foldersize,
+    foldername = os.path.basename(folderpath)
+    item = [current_idx, folderpath, foldername, None, foldersize,
             stats.st_atime, stats.st_mtime, stats.st_ctime,
             True, num_files, depth, parent_idx]
     if hash_name:
@@ -66,7 +71,9 @@ def _recursive_folderstats(folderpath, items=[], hash_name=None,
 
 
 def folderstats(folderpath, hash_name=None, microseconds=False,
-    absolute_paths=False, ignore_hidden=False, parent=True, verbose=False):
+                absolute_paths=False, ignore_hidden=False, parent=True,
+                verbose=False):
+    """Function that returns a Pandas dataframe from the folders and files from a selected folder."""
     columns = ['id', 'path', 'name', 'extension', 'size',
                'atime', 'mtime', 'ctime',
                'folder', 'num_files', 'depth', 'parent']
@@ -87,10 +94,10 @@ def folderstats(folderpath, hash_name=None, microseconds=False,
                 datetime.fromtimestamp(d).replace(microsecond=0))
 
     if absolute_paths:
-        df.insert(0, 'absolute_path', df['path'].apply(
+        df.insert(1, 'absolute_path', df['path'].apply(
             lambda p: os.path.abspath(p)))
 
-    if parent:
+    if not parent:
         df.drop(columns=['id', 'parent'], inplace=True)
 
     return df

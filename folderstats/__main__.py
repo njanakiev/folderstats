@@ -49,14 +49,13 @@ def main():
         print('Output type not supported : ', args.folderpath)
         exit(-1)
 
-    df = folderstats.folderstats(
-        args.folderpath,
-        hash_name=args.hash_name,
-        microseconds=args.microseconds,
-        absolute_paths=args.absolute_paths,
-        ignore_hidden=args.ignore_hidden,
-        parent=args.parent,
-        verbose=args.verbose)
+    df = folderstats.folderstats(args.folderpath,
+                                 hash_name=args.hash_name,
+                                 microseconds=args.microseconds,
+                                 absolute_paths=args.absolute_paths,
+                                 ignore_hidden=args.ignore_hidden,
+                                 parent=args.parent,
+                                 verbose=args.verbose)
 
     if args.output_filepath:
         if args.output_filepath.endswith('.csv'):
