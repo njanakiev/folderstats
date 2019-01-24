@@ -6,6 +6,9 @@ folderstats
 
 This is a python module and command-line interface that creates statistics from a folder structure. It returns a `Pandas`_ dataframe from the folders and files from a selected folder.
 
+.. image:: folder_structure.png
+	:alt: Folder Structure Graph
+
 Installation
 ------------
 
