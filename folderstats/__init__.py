@@ -29,6 +29,10 @@ def _recursive_folderstats(folderpath, items=[], hash_name=None,
     foldersize, num_files = 0, 0
     current_idx = idx
 
+    if os.name == 'nt':
+        PREFIX = '\\\\?\\'
+        folderpath = PREFIX + folderpath if not(PREFIX in folderpath) else folderpath
+        
     for f in os.listdir(folderpath):
         if ignore_hidden and f.startswith('.'):
             continue
