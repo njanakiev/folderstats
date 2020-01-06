@@ -52,7 +52,7 @@ def _recursive_folderstats(folderpath, items=[], hash_name=None,
             extension = extension[1:] if extension else None
             item = [idx, filepath, filename, extension, stats.st_size,
                     stats.st_atime, stats.st_mtime, stats.st_ctime,
-                    False, None, depth, current_idx]
+                    False, None, depth, current_idx, stats.st_uid]
             if hash_name:
                 item.append(calculate_hash(filepath, hash_name))
             items.append(item)
@@ -76,7 +76,7 @@ def folderstats(folderpath, hash_name=None, microseconds=False,
     """Function that returns a Pandas dataframe from the folders and files from a selected folder."""
     columns = ['id', 'path', 'name', 'extension', 'size',
                'atime', 'mtime', 'ctime',
-               'folder', 'num_files', 'depth', 'parent']
+               'folder', 'num_files', 'depth', 'parent', 'uid']
     if hash_name:
         hash_name = hash_name.lower()
         columns.append(hash_name)
