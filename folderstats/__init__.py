@@ -62,7 +62,7 @@ def _recursive_folderstats(folderpath, items=[], hash_name=None,
     foldername = os.path.basename(folderpath)
     item = [current_idx, folderpath, foldername, None, foldersize,
             stats.st_atime, stats.st_mtime, stats.st_ctime,
-            True, num_files, depth, parent_idx]
+            True, num_files, depth, parent_idx, stats.st_uid]
     if hash_name:
         item.append(None)
     items.append(item)
