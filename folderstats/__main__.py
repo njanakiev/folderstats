@@ -69,7 +69,7 @@ def main():
 
         # Print table to console
         print(','.join(df.columns))
-        for row in df.itertuples(index=False, name=False):
+        for row in df.itertuples(index=False, name=None):
             print(','.join(str(s) for s in row))
 
 
