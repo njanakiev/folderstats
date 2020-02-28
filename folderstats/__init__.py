@@ -22,10 +22,11 @@ def calculate_hash(filepath, hash_name):
         return checksum.hexdigest()
 
 
-def _recursive_folderstats(folderpath, items=[], hash_name=None,
+def _recursive_folderstats(folderpath, items=None, hash_name=None,
                            ignore_hidden=False, depth=0, idx=1, parent_idx=0,
                            verbose=False):
     """Helper function that recursively collects folder statistics and returns current id, foldersize and number of files traversed."""
+    items = items if items is not None else []
     foldersize, num_files = 0, 0
     current_idx = idx
 
