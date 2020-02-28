@@ -30,34 +30,35 @@ def _recursive_folderstats(folderpath, items=None, hash_name=None,
     foldersize, num_files = 0, 0
     current_idx = idx
 
-    for f in os.listdir(folderpath):
-        if ignore_hidden and f.startswith('.'):
-            continue
+    if os.access(folderpath, os.R_OK):
+        for f in os.listdir(folderpath):
+            if ignore_hidden and f.startswith('.'):
+                continue
 
-        filepath = os.path.join(folderpath, f)
-        stats = os.stat(filepath)
-        foldersize += stats.st_size
-        idx += 1
+            filepath = os.path.join(folderpath, f)
+            stats = os.stat(filepath)
+            foldersize += stats.st_size
+            idx += 1
 
-        if os.path.isdir(filepath):
-            if verbose:
-                print('FOLDER : {}'.format(filepath))
+            if os.path.isdir(filepath):
+                if verbose:
+                    print('FOLDER : {}'.format(filepath))
 
-            idx, items, _foldersize, _num_files = _recursive_folderstats(
-                filepath, items, hash_name,
-                ignore_hidden, depth + 1, idx, current_idx, verbose)
-            foldersize += _foldersize
-            num_files += _num_files
-        else:
-            filename, extension = os.path.splitext(f)
-            extension = extension[1:] if extension else None
-            item = [idx, filepath, filename, extension, stats.st_size,
-                    stats.st_atime, stats.st_mtime, stats.st_ctime,
-                    False, None, depth, current_idx, stats.st_uid]
-            if hash_name:
-                item.append(calculate_hash(filepath, hash_name))
-            items.append(item)
-            num_files += 1
+                idx, items, _foldersize, _num_files = _recursive_folderstats(
+                    filepath, items, hash_name,
+                    ignore_hidden, depth + 1, idx, current_idx, verbose)
+                foldersize += _foldersize
+                num_files += _num_files
+            else:
+                filename, extension = os.path.splitext(f)
+                extension = extension[1:] if extension else None
+                item = [idx, filepath, filename, extension, stats.st_size,
+                        stats.st_atime, stats.st_mtime, stats.st_ctime,
+                        False, None, depth, current_idx, stats.st_uid]
+                if hash_name:
+                    item.append(calculate_hash(filepath, hash_name))
+                items.append(item)
+                num_files += 1
 
     stats = os.stat(folderpath)
     foldername = os.path.basename(folderpath)
