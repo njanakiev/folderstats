@@ -12,7 +12,7 @@ with open(os.path.join(HERE, "README.rst")) as fid:
 # This call to setup() does all the work
 setup(
     name="folderstats",
-    version="0.2.0",
+    version="0.3.0",
     description="Creates statistics from a folder structure",
     long_description=README,
     url="https://github.com/njanakiev/folderstats",
