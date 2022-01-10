@@ -22,63 +22,90 @@ def calculate_hash(filepath, hash_name):
         return checksum.hexdigest()
 
 
-def _recursive_folderstats(folderpath, items=None, hash_name=None,
-                           ignore_hidden=False, depth=0, idx=1, parent_idx=0,
-                           verbose=False):
+def _recursive_folderstats(
+    root_entry,
+    items=None,
+    hash_name=None,
+    ignore_hidden=False,
+    depth=0,
+    idx=1,
+    parent_idx=0,
+    verbose=False
+):
     """Helper function that recursively collects folder statistics and returns current id, foldersize and number of files traversed."""
     items = items if items is not None else []
     foldersize, num_files = 0, 0
     current_idx = idx
 
+    if isinstance(root_entry, os.DirEntry):
+        folderpath = root_entry.path
+        foldername = root_entry.name
+        root_stat  = root_entry.stat()
+    else:
+        folderpath = root_entry
+        foldername = os.path.basename(root_entry)
+        root_stat  = os.stat(root_entry)
+
     if os.access(folderpath, os.R_OK):
-        for f in os.listdir(folderpath):
-            if ignore_hidden and f.startswith('.'):
+        for entry in os.scandir(folderpath):
+            if ignore_hidden and entry.name.startswith('.'):
                 continue
 
-            filepath = os.path.join(folderpath, f)
-            stats = os.stat(filepath)
-            foldersize += stats.st_size
+            stat = entry.stat()
+            foldersize += stat.st_size
             idx += 1
 
-            if os.path.isdir(filepath):
+            #if os.path.isdir(entry.path):
+            if entry.is_dir():
                 if verbose:
-                    print('FOLDER : {}'.format(filepath))
+                    print(f'FOLDER: {entry.path}')
 
                 idx, items, _foldersize, _num_files = _recursive_folderstats(
-                    filepath, items, hash_name,
+                    entry.path, items, hash_name,
                     ignore_hidden, depth + 1, idx, current_idx, verbose)
                 foldersize += _foldersize
                 num_files += _num_files
             else:
-                filename, extension = os.path.splitext(f)
+                filename, extension = os.path.splitext(entry.name)
                 extension = extension[1:] if extension else None
-                item = [idx, filepath, filename, extension, stats.st_size,
-                        stats.st_atime, stats.st_mtime, stats.st_ctime,
-                        False, None, depth, current_idx, stats.st_uid]
+                item = [
+                    idx, entry.path, filename, extension, stat.st_size,
+                    stat.st_atime, stat.st_mtime, stat.st_ctime,
+                    False, None, depth, current_idx, stat.st_uid
+                ]
                 if hash_name:
-                    item.append(calculate_hash(filepath, hash_name))
+                    item.append(calculate_hash(entry.path, hash_name))
                 items.append(item)
                 num_files += 1
 
-    stats = os.stat(folderpath)
-    foldername = os.path.basename(folderpath)
-    item = [current_idx, folderpath, foldername, None, foldersize,
-            stats.st_atime, stats.st_mtime, stats.st_ctime,
-            True, num_files, depth, parent_idx, stats.st_uid]
-    if hash_name:
+    item = [
+        current_idx, folderpath, foldername, None, foldersize,
+        root_stat.st_atime, root_stat.st_mtime, root_stat.st_ctime,
+        True, num_files, depth, parent_idx, root_stat.st_uid
+    ]
+    if hash_name is not None:
         item.append(None)
+    
     items.append(item)
 
     return idx, items, foldersize, num_files
 
 
-def folderstats(folderpath, hash_name=None, microseconds=False,
-                absolute_paths=False, ignore_hidden=False, parent=True,
-                verbose=False):
+def folderstats(
+    folderpath,
+    hash_name=None,
+    microseconds=False,
+    absolute_paths=False,
+    ignore_hidden=False,
+    parent=True,
+    verbose=False
+):
     """Function that returns a Pandas dataframe from the folders and files from a selected folder."""
-    columns = ['id', 'path', 'name', 'extension', 'size',
-               'atime', 'mtime', 'ctime',
-               'folder', 'num_files', 'depth', 'parent', 'uid']
+    columns = [
+        'id', 'path', 'name', 'extension', 'size',
+        'atime', 'mtime', 'ctime',
+        'folder', 'num_files', 'depth', 'parent', 'uid'
+    ]
     if hash_name:
         hash_name = hash_name.lower()
         columns.append(hash_name)

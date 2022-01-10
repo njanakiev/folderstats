@@ -1,5 +1,6 @@
 import os
 import argparse
+import pandas as pd
 import folderstats
 
 
@@ -41,36 +42,37 @@ def main():
     args = parser.parse_args()
 
     if not os.path.isdir(args.folderpath):
-        print('Filepath is not a folder : ', args.folderpath)
+        print(f'Filepath is not a folder: {args.folderpath}')
         exit(-1)
 
     if args.output_filepath and \
-        not args.output_filepath.endswith(('.csv', '.json')):
-        print('Output type not supported : ', args.folderpath)
+        not args.output_filepath.endswith(('.csv', '.csv.gz', '.json')):
+        print(f'Output type not supported: {args.output_filepath}')
         exit(-1)
 
-    df = folderstats.folderstats(args.folderpath,
-                                 hash_name=args.hash_name,
-                                 microseconds=args.microseconds,
-                                 absolute_paths=args.absolute_paths,
-                                 ignore_hidden=args.ignore_hidden,
-                                 parent=args.parent,
-                                 verbose=args.verbose)
+    df = folderstats.folderstats(
+        args.folderpath,
+        hash_name=args.hash_name,
+        microseconds=args.microseconds,
+        absolute_paths=args.absolute_paths,
+        ignore_hidden=args.ignore_hidden,
+        parent=args.parent,
+        verbose=args.verbose)
 
     if args.output_filepath:
-        if args.output_filepath.endswith('.csv'):
+        if args.output_filepath.endswith('.csv') or \
+           args.output_filepath.endswith('.csv.gz'):
             df.to_csv(args.output_filepath, index=False)
         elif args.output_filepath.endswith('.json'):
-            df.to_json(args.output_filepath, index=False)
+            df.to_json(args.output_filepath, orient='records')
+        else:
+            raise NotImplementedError(
+                f"Output type {args.output_filepath} not implemented")
     else:
-        # Remove microseconds from timestamps
-        for col in ['atime', 'mtime', 'ctime']:
-            df[col] = df[col].apply(lambda d: d.replace(microsecond=0))
-
         # Print table to console
         print(','.join(df.columns))
         for row in df.itertuples(index=False, name=None):
-            print(','.join(str(s) for s in row))
+            print(','.join("" if pd.isna(s) else str(s) for s in row))
 
 
 if __name__ == '__main__':
