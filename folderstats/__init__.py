@@ -27,6 +27,8 @@ def _recursive_folderstats(
     items=None,
     hash_name=None,
     ignore_hidden=False,
+    exclude=None,
+    filter_extension=None,
     depth=0,
     idx=1,
     parent_idx=0,
@@ -51,6 +53,9 @@ def _recursive_folderstats(
             if ignore_hidden and entry.name.startswith('.'):
                 continue
 
+            if exclude and (entry.name in exclude):
+                continue
+
             stat = entry.stat()
             foldersize += stat.st_size
             idx += 1
@@ -62,12 +67,17 @@ def _recursive_folderstats(
 
                 idx, items, _foldersize, _num_files = _recursive_folderstats(
                     entry.path, items, hash_name,
-                    ignore_hidden, depth + 1, idx, current_idx, verbose)
+                    ignore_hidden, exclude, filter_extension,
+                    depth + 1, idx, current_idx, verbose)
                 foldersize += _foldersize
                 num_files += _num_files
             else:
                 filename, extension = os.path.splitext(entry.name)
                 extension = extension[1:] if extension else None
+
+                if filter_extension and (extension not in filter_extension):
+                    continue
+
                 item = [
                     idx, entry.path, filename, extension, stat.st_size,
                     stat.st_atime, stat.st_mtime, stat.st_ctime,
@@ -96,6 +106,8 @@ def folderstats(
     hash_name=None,
     microseconds=False,
     absolute_paths=False,
+    exclude=None,
+    filter_extension=None,
     ignore_hidden=False,
     parent=True,
     verbose=False
@@ -114,6 +126,8 @@ def folderstats(
         folderpath,
         hash_name=hash_name,
         ignore_hidden=ignore_hidden,
+        exclude=exclude,
+        filter_extension=filter_extension,
         verbose=verbose)
     df = pd.DataFrame(items, columns=columns)
 

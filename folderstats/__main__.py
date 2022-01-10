@@ -34,6 +34,14 @@ def main():
         dest='parent', default=False,
         help='Add index and parent index',
         required=False)
+    parser.add_argument('-e' '--exclude', action='store',
+        dest='exclude',
+        help='Exclude files and folders by name',
+        required=False)
+    parser.add_argument('-f' '--filter-extension', action='store',
+        dest='filter_extension',
+        help='Filter files by extension',
+        required=False)
     parser.add_argument('-v', action='store_true',
         dest='verbose', default=False,
         help='verbose console output',
@@ -50,12 +58,19 @@ def main():
         print(f'Output type not supported: {args.output_filepath}')
         exit(-1)
 
+    exclude = args.exclude.split(',') \
+        if args.exclude else None
+    filter_extension = args.filter_extension.split(',') \
+        if args.filter_extension else None
+
     df = folderstats.folderstats(
         args.folderpath,
         hash_name=args.hash_name,
         microseconds=args.microseconds,
         absolute_paths=args.absolute_paths,
         ignore_hidden=args.ignore_hidden,
+        exclude=exclude,
+        filter_extension=filter_extension,
         parent=args.parent,
         verbose=args.verbose)
 
