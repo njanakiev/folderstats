@@ -34,13 +34,17 @@ def main():
         dest='parent', default=False,
         help='Add index and parent index',
         required=False)
-    parser.add_argument('-e' '--exclude', action='store',
+    parser.add_argument('-e', '--exclude', action='store',
         dest='exclude',
         help='Exclude files and folders by name',
         required=False)
-    parser.add_argument('-f' '--filter-extension', action='store',
+    parser.add_argument('-f', '--filter-extension', action='store',
         dest='filter_extension',
         help='Filter files by extension',
+        required=False)
+    parser.add_argument('-l', '--follow-links', action='store_true',
+        dest='follow_links', default=False,
+        help='Follow symbolic and hard links',
         required=False)
     parser.add_argument('-v', action='store_true',
         dest='verbose', default=False,
@@ -71,6 +75,7 @@ def main():
         ignore_hidden=args.ignore_hidden,
         exclude=exclude,
         filter_extension=filter_extension,
+        follow_links=args.follow_links,
         parent=args.parent,
         verbose=args.verbose)
 

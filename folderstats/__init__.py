@@ -1,6 +1,7 @@
-__version__ = "0.3.0"
+__version__ = "0.4.0"
 
 import os
+import stat
 import hashlib
 import pandas as pd
 from datetime import datetime
@@ -29,6 +30,7 @@ def _recursive_folderstats(
     ignore_hidden=False,
     exclude=None,
     filter_extension=None,
+    follow_links=False,
     depth=0,
     idx=1,
     parent_idx=0,
@@ -56,36 +58,45 @@ def _recursive_folderstats(
             if exclude and (entry.name in exclude):
                 continue
 
-            stat = entry.stat()
-            foldersize += stat.st_size
             idx += 1
-
-            #if os.path.isdir(entry.path):
-            if entry.is_dir():
+            if entry.is_dir() or entry.is_symlink():
                 if verbose:
                     print(f'FOLDER: {entry.path}')
 
+                if entry.is_symlink():
+                    # Check if symbolic link is broken
+                    if not follow_links \
+                       or os.path.exists(os.readlink(entry.path)):
+                        continue
+                
+                stat = entry.stat()
+                foldersize += stat.st_size
+
                 idx, items, _foldersize, _num_files = _recursive_folderstats(
                     entry.path, items, hash_name,
-                    ignore_hidden, exclude, filter_extension,
+                    ignore_hidden, exclude, filter_extension, follow_links,
                     depth + 1, idx, current_idx, verbose)
                 foldersize += _foldersize
                 num_files += _num_files
             else:
                 filename, extension = os.path.splitext(entry.name)
                 extension = extension[1:] if extension else None
-
+                
                 if filter_extension and (extension not in filter_extension):
                     continue
 
+                stat = entry.stat()
                 item = [
                     idx, entry.path, filename, extension, stat.st_size,
                     stat.st_atime, stat.st_mtime, stat.st_ctime,
                     False, None, depth, current_idx, stat.st_uid
                 ]
                 if hash_name:
-                    item.append(calculate_hash(entry.path, hash_name))
+                    if os.access(entry.path, os.R_OK):
+                        item.append(calculate_hash(entry.path, hash_name))
+                
                 items.append(item)
+                foldersize += stat.st_size
                 num_files += 1
 
     item = [
@@ -108,6 +119,7 @@ def folderstats(
     absolute_paths=False,
     exclude=None,
     filter_extension=None,
+    follow_links=False,
     ignore_hidden=False,
     parent=True,
     verbose=False
@@ -128,6 +140,7 @@ def folderstats(
         ignore_hidden=ignore_hidden,
         exclude=exclude,
         filter_extension=filter_extension,
+        follow_links=follow_links,
         verbose=verbose)
     df = pd.DataFrame(items, columns=columns)
 
