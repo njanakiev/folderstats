@@ -1,4 +1,5 @@
 import os
+import logging
 import argparse
 import pandas as pd
 import folderstats
@@ -53,6 +54,12 @@ def main():
 
     args = parser.parse_args()
 
+    logging.basicConfig(
+        format='%(asctime)s, %(name)s %(levelname)s %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        level=logging.DEBUG if args.verbose else logging.WARN)
+
+
     if not os.path.isdir(args.folderpath):
         print(f'Filepath is not a folder: {args.folderpath}')
         exit(-1)
@@ -76,8 +83,7 @@ def main():
         exclude=exclude,
         filter_extension=filter_extension,
         follow_links=args.follow_links,
-        parent=args.parent,
-        verbose=args.verbose)
+        parent=args.parent)
 
     if args.output_filepath:
         if args.output_filepath.endswith('.csv') or \
