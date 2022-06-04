@@ -9,10 +9,18 @@ HERE = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(HERE, "README.md")) as fid:
     README = fid.read()
 
+
+# Version number
+with open("folderstats/__init__.py") as f:
+    for line in f:
+        if "__version__" in line:
+            version = line.split("=")[1].strip().strip('"').strip("'")
+            break
+
 # This call to setup() does all the work
 setup(
     name="folderstats",
-    version="0.4.1",
+    version=version,
     description="Creates statistics from a folder structure",
     long_description=README,
     long_description_content_type='text/markdown',
