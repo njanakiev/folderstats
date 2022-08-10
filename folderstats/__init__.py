@@ -148,10 +148,11 @@ def folderstats(
         follow_links=follow_links)
     df = pd.DataFrame(items, columns=columns)
 
-    for col in ['atime', 'mtime', 'ctime']:
-        df[col] = df[col].apply(
-            lambda d: datetime.fromtimestamp(d) if microseconds else \
-                datetime.fromtimestamp(d).replace(microsecond=0))
+    if microseconds:
+        for col in ['atime', 'mtime', 'ctime']:
+            df[col] = df[col].apply(
+                lambda d: datetime.fromtimestamp(d) if microseconds else \
+                    datetime.fromtimestamp(d).replace(microsecond=0))
 
     if absolute_paths:
         df.insert(1, 'absolute_path', df['path'].apply(
