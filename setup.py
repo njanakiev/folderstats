@@ -1,13 +1,5 @@
 from setuptools import setup
-import os.path
-
-
-# The directory containing this file
-HERE = os.path.abspath(os.path.dirname(__file__))
-
-# The text of the README file
-with open(os.path.join(HERE, "README.md")) as fid:
-    README = fid.read()
+from pathlib import Path
 
 
 # Version number
@@ -16,6 +8,21 @@ with open("folderstats/__init__.py") as f:
         if "__version__" in line:
             version = line.split("=")[1].strip().strip('"').strip("'")
             break
+
+# The text of the README file
+this_directory = Path(__file__).absolute().parent
+with open(this_directory / "README.md") as f:
+    README = f.read()
+
+# Requirements
+try:
+    this_directory = Path(__file__).absolute().parent
+    with open((this_directory / 'requirements.txt'), encoding='utf-8') as f:
+        requirements = f.readlines()
+    requirements = [line.strip() for line in requirements]
+except FileNotFoundError:
+    requirements = []
+
 
 # This call to setup() does all the work
 setup(
@@ -55,7 +62,7 @@ setup(
     platforms='any',
     packages=['folderstats'],
     include_package_data=True,
-    install_requires=["pandas"],
+    install_requires=requirements,
     entry_points={
         "console_scripts": [
             "folderstats = folderstats.__main__:main"
